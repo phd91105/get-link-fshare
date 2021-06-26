@@ -26,7 +26,7 @@
             <label for="exampleInputPassword1">Generated Link</label>
             <input id="generated" type="text" class="form-control" readonly>
         </div>
-        <button id="create" class="btn btn-primary mt-2">GetLink</button>
+        <button id="create" class="btn btn-primary mt-2">Get Link</button>
         <button id="copy" class="js-textareacopybtn btn btn-success mt-2" data-id="generated"
             disabled="disabled">Copy</button>
         <button id="download" class="btn btn-danger mt-2" disabled="disabled">Download</button>
@@ -47,11 +47,11 @@
             const inputURL = $("#original").val();
             const password = $("#password").val();
             if (regEx.test(inputURL)) {
-                $("#create").html(`<span class="spinner-border spinner-border-sm ml-3 mr-3" role="status" aria-hidden="true"></span>`).attr("disabled", true);
+                $("#create").html(`<span class="spinner-border spinner-border-sm ml-4 mr-4" role="status" aria-hidden="true"></span>`).attr("disabled", true);
                 $.get('/generate',
                     { url: inputURL, password: password },
                     function (res) {
-                        $("#create").html('GetLink').removeAttr("disabled");
+                        $("#create").html('Get Link').removeAttr("disabled");
                         if (res.code == 200) {
                             $("#generated").val(res.location.replace('http://', 'https://'));
                             $("#download").removeAttr("disabled");
