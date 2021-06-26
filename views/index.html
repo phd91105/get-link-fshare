@@ -38,13 +38,14 @@
     $(document).ready(function () {
         $("#original").on("input", function () {
             $("#urlError").hide();
+            $("#download").removeAttr("disabled");
         });
         $('#download').click(function () {
             document.location.href = $("#generated").val();
         });
         $("#create").click(() => {
             const regEx = /^https:\/\/www\.fshare\.vn\/file\/.+/;
-            const inputURL = $("#original").val();
+            const inputURL = regEx.test($("#original").val()) ? $("#original").val() : `https://${$("#original").val()}`;
             const password = $("#password").val();
             if (regEx.test(inputURL)) {
                 $("#create").html(`<span class="spinner-border spinner-border-sm ml-4 mr-4" role="status" aria-hidden="true"></span>`).attr("disabled", true);
@@ -54,7 +55,6 @@
                         $("#create").html('Get Link').removeAttr("disabled");
                         if (res.code == 200) {
                             $("#generated").val(res.location.replace('http://', 'https://'));
-                            $("#download").removeAttr("disabled");
                             $("#copy").removeAttr("disabled");
                         } else if (res.code == 123) {
                             $("#generated").val("Invalid file password!");
@@ -73,7 +73,6 @@
         $('.js-textareacopybtn').on('click', function (event) {
             var copyTextarea = $(this).data('id');
             $('#' + copyTextarea)[0].select();
-
             try {
                 var successful = document.execCommand('copy');
                 var msg = successful ? 'successful' : 'unsuccessful';
