@@ -1,0 +1,46 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_REGISTRY_USER }}
+          password: ${{ secrets.DOCKER_REGISTRY_PASS }}
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_REPO }}:latest
+  deploy:
+    name: Deploy Web
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create ssh_key file
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ssh_key.pem
+          chmod 400 ssh_key.pem
+      - name: Login Docker Hub
+        run: ssh -o StrictHostKeyChecking=no -i ssh_key.pem "${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}" "echo "${{ secrets.DOCKER_REGISTRY_PASS }}" | docker login --username ${{ secrets.DOCKER_REGISTRY_USER }} --password-stdin"
+      - name: Remove old image and container
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ssh_key.pem "${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}" "docker ps -q --filter ancestor=${{ secrets.DOCKER_REPO }} | xargs -r docker stop | xargs -r docker rm -f || true"
+          ssh -o StrictHostKeyChecking=no -i ssh_key.pem "${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}" "docker images -q ${{ secrets.DOCKER_REPO }} | xargs -r docker rmi -f || true"
+          ssh -o StrictHostKeyChecking=no -i ssh_key.pem "${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}" "docker system prune -f"
+      - name: Run latest image
+        run: ssh -o StrictHostKeyChecking=no -i ssh_key.pem "${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}" "docker run -d -p 8080:8080 -e EMAIL=${{ secrets.EMAIL }} -e PASSWORD=${{ secrets.PASSWORD }} -e APP_KEY=${{ secrets.APP_KEY }} -e USER_AGENT=${{ secrets.USER_AGENT }} ${{ secrets.DOCKER_REPO }}"
