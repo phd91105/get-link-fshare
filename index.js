@@ -6,6 +6,7 @@ import "dotenv/config";
 const app = express();
 
 let auth;
+let loginCount = 0;
 const { EMAIL, PASSWORD, APP_KEY, USER_AGENT } = process.env;
 app.use(express.json());
 app.use(express.static("public"));
@@ -72,6 +73,8 @@ function refreshToken() {
         }
       )
       .then((response) => {
+        loginCount++;
+        console.log(`Login Count: ${loginCount}`);
         resolve((auth = response.data));
       });
   });
