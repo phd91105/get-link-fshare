@@ -2,6 +2,7 @@ $(document).ready(function () {
   $("#original").on("input", function () {
     $("#urlError").hide();
     $("#create").removeAttr("disabled");
+    $("#fileName").html("Generated Link");
   });
   $("#download").click(function () {
     document.location.href = $("#generated").val();
@@ -22,6 +23,11 @@ $(document).ready(function () {
         $("#create").html("Get Link");
         if (res.code == 200) {
           $("#generated").val(res.location.replace("http://", "https://"));
+          $("#fileName").html(
+            `File name: <span class='text-success'>${decodeURI(
+              $("#generated").val().split("/")[5]
+            )}</span>`
+          );
           $("#copy").removeAttr("disabled");
           $("#download").removeAttr("disabled");
         } else if (res.code == 123) {
@@ -36,13 +42,11 @@ $(document).ready(function () {
       $("#urlError").show();
     }
   });
-  $(".js-textareacopybtn").click(function (event) {
+  $(".js-textareacopybtn").click(function () {
     var copyTextarea = $(this).data("id");
     $("#" + copyTextarea)[0].select();
     try {
-      var successful = document.execCommand("copy");
-      var msg = successful ? "successful" : "unsuccessful";
-      console.log("Copying text command was " + msg);
+      document.execCommand("copy");
     } catch (err) {
       console.log("Oops, unable to copy");
     }
