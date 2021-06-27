@@ -15,39 +15,28 @@ app.get("/", (_, res) => {
 
 app.get("/generate", (req, res) => {
   try {
-    axios({
-      method: "get",
-      url: "https://api.fshare.vn/api/session/download",
-      headers: {
-        "User-Agent": USER_AGENT,
-        Cookie: `session_id=${auth.session_id}`,
-        "Content-Type": "application/json",
-      },
-      data: JSON.stringify({
-        url: req.query.url,
-        password: req.query.password,
-        token: auth.token,
-        zipflag: 0,
-      }),
-    })
+    const config = (token, session_id) => {
+      return {
+        method: "get",
+        url: "https://api.fshare.vn/api/session/download",
+        headers: {
+          "User-Agent": USER_AGENT,
+          Cookie: `session_id=${session_id}`,
+          "Content-Type": "application/json",
+        },
+        data: JSON.stringify({
+          url: req.query.url,
+          password: req.query.password,
+          token: token,
+          zipflag: 0,
+        }),
+      };
+    };
+    axios(config(auth.token, auth.session_id))
       .then(async function (response) {
         if (response.data.code == 201) {
           await refreshToken();
-          axios({
-            method: "get",
-            url: "https://api.fshare.vn/api/session/download",
-            headers: {
-              "User-Agent": USER_AGENT,
-              Cookie: `session_id=${auth.session_id}`,
-              "Content-Type": "application/json",
-            },
-            data: JSON.stringify({
-              url: req.query.url,
-              password: req.query.password,
-              token: auth.token,
-              zipflag: 0,
-            }),
-          })
+          axios(config(auth.token, auth.session_id))
             .then(function (response) {
               res.json({ ...response.data, code: 200 });
             })
@@ -88,22 +77,4 @@ function refreshToken() {
   });
 }
 
-app.listen(process.env.PORT || 8080, () => {
-  axios
-    .post(
-      "https://api.fshare.vn/api/user/login",
-      {
-        user_email: EMAIL,
-        password: PASSWORD,
-        app_key: APP_KEY,
-      },
-      {
-        headers: {
-          "User-Agent": USER_AGENT,
-        },
-      }
-    )
-    .then((response) => {
-      auth = response.data;
-    });
-});
+app.listen(process.env.PORT || 8080, async () => await refreshToken());
