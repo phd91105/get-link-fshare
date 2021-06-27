@@ -4,14 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no" />
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <script src="assets/js/jquery-3.6.0.min.js"></script>
+    <link rel="icon" href="assets/images/favicon.png">
     <title>Getlink Fshare</title>
 </head>
 
 <body>
     <div id="mainForm" class="container mt-5">
-        <img height="50" class="mb-3" src="https://www.fshare.vn/images/fshare-logo-17072020.svg" alt="Fshare">
+        <img height="50" class="mb-3" src="assets/images/fshare-logo-17072020.svg" alt="Fshare">
         <div class="form-group">
             <label>Fshare Link <span class="text-danger">*</span></label>
             <input id="original" type="text" class="form-control" placeholder="https://www.fshare.vn/file/XXXXX"
@@ -43,10 +44,10 @@
         $('#download').click(function () {
             document.location.href = $("#generated").val();
         });
-        $("#create").click(() => {
-            const regEx = /^https:\/\/www\.fshare\.vn\/file\/.+/;
-            const inputURL = regEx.test($("#original").val()) ? $("#original").val() : `https://${$("#original").val()}`;
-            const password = $("#password").val();
+        $("#create").click(function () {
+            var regEx = /^https:\/\/www\.fshare\.vn\/file\/.+/;
+            var inputURL = regEx.test($("#original").val()) ? $("#original").val() : `https://${$("#original").val()}`;
+            var password = $("#password").val();
             if (regEx.test(inputURL)) {
                 $("#create").html(`<span class="spinner-border spinner-border-sm ml-4 mr-4" role="status" aria-hidden="true"></span>`).attr("disabled", true);
                 $.get('/generate',
@@ -71,7 +72,7 @@
                 $("#urlError").show();
             }
         })
-        $('.js-textareacopybtn').on('click', function (event) {
+        $('.js-textareacopybtn').click(function (event) {
             var copyTextarea = $(this).data('id');
             $('#' + copyTextarea)[0].select();
             try {

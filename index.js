@@ -8,28 +8,7 @@ const app = express();
 let auth;
 const { EMAIL, PASSWORD, APP_KEY, USER_AGENT } = process.env;
 app.use(express.json());
-
-app.get("/login", (_, res) => {
-  axios
-    .post(
-      "https://api.fshare.vn/api/user/login",
-      {
-        user_email: EMAIL,
-        password: PASSWORD,
-        app_key: APP_KEY,
-      },
-      {
-        headers: {
-          "User-Agent": USER_AGENT,
-        },
-      }
-    )
-    .then((response) => {
-      auth = response.data;
-      res.json({ msg: "login success" });
-    });
-});
-
+app.use(express.static("public"));
 app.get("/", (_, res) => {
   res.sendFile("views/index.html", { root: path.resolve() });
 });
@@ -109,4 +88,22 @@ function refreshToken() {
   });
 }
 
-app.listen(process.env.PORT || 8080);
+app.listen(process.env.PORT || 8080, () => {
+  axios
+    .post(
+      "https://api.fshare.vn/api/user/login",
+      {
+        user_email: EMAIL,
+        password: PASSWORD,
+        app_key: APP_KEY,
+      },
+      {
+        headers: {
+          "User-Agent": USER_AGENT,
+        },
+      }
+    )
+    .then((response) => {
+      auth = response.data;
+    });
+});
